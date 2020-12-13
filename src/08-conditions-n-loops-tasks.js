@@ -387,12 +387,17 @@ function toNaryString(num, n) {
  *   ['/web/assets/style.css', '/.bin/mocha',  '/read.me'] => '/'
  *   ['/web/favicon.ico', '/web-scripts/dump', '/webalizer/logs'] => '/'
  */
-function getCommonDirectoryPath(/* pathes */) {
-  throw new Error('Not implemented');
-  // return `${pathes[0].split('/').reduce((res, dir) => {
-  //   if (pathes.every((path) => path.includes(dir))) res.push(dir);
-  //   return res;
-  // }, []).join('/')}/`;
+function getCommonDirectoryPath(pathes) {
+  return [...pathes[0]].reduce((obj, char, index) => {
+    if (!obj.stop) {
+      if (pathes.every((path) => path[index] === char)) {
+        Object.assign(obj, { res: obj.res + char, stop: false });
+      } else {
+        Object.assign(obj, { res: obj.res.slice(0, obj.res.lastIndexOf('/') + 1), stop: true });
+      }
+    }
+    return obj;
+  }, { res: '', stop: false }).res;
 }
 
 
@@ -414,8 +419,22 @@ function getCommonDirectoryPath(/* pathes */) {
  *                         [ 6 ]]
  *
  */
-function getMatrixProduct(/* m1, m2 */) {
-  throw new Error('Not implemented');
+function getMatrixProduct(m1, m2) {
+  const cols = m2[0].reduce((res, _, colIndex) => {
+    res.push([...Array(m2.length).keys()].map((__, rowIndex) => m2[rowIndex][colIndex]));
+    return res;
+  }, []);
+
+  return cols.reduce((res, col) => {
+    m1.forEach((row, rowIndex) => {
+      const sumVal = row.reduce((sum, el, index) => sum + (
+        el * col[index]
+      ), 0);
+      if (res[rowIndex] === undefined) res.push([sumVal]);
+      else res[rowIndex].push(sumVal);
+    }, []);
+    return res;
+  }, []);
 }
 
 
@@ -449,8 +468,31 @@ function getMatrixProduct(/* m1, m2 */) {
  *    [    ,   ,    ]]
  *
  */
-function evaluateTicTacToePosition(/* position */) {
-  throw new Error('Not implemented');
+function evaluateTicTacToePosition(position) {
+  const isWin = (value) => {
+    const rows = [...Array(position.length).keys()].some((_, rowIndex) => (
+      [...Array(position.length).keys()].every((__, colIndex) => (
+        position[rowIndex][colIndex] === value
+      ))));
+
+    const cols = [...Array(position.length).keys()].some((_, rowIndex) => (
+      [...Array(position.length).keys()].every((__, colIndex) => (
+        position[colIndex][rowIndex] === value
+      ))));
+
+    const leftDiagonal = [...Array(position.length).keys()].every((_, rowIndex) => (
+      position[rowIndex][rowIndex] === value
+    ));
+
+    const rightDiagonal = [...Array(position.length).keys()].every((_, rowIndex) => (
+      position[rowIndex][position.length - (rowIndex + 1)] === value
+    ));
+
+    return rows || cols || leftDiagonal || rightDiagonal;
+  };
+  if (isWin('X')) return 'X';
+  if (isWin('0')) return '0';
+  return undefined;
 }
 
 
